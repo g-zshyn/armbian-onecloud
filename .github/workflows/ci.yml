@@ -191,13 +191,13 @@ jobs:
         BRANCH:
           - current
         RELEASE:
-          # - focal # Ubuntu 20.04 LTS
-          # - jammy # Ubuntu 22.04 LTS
 
 
 
-          # - buster # Debian 10
-          # - bullseye # Debian 11
+
+
+
+
           - bookworm # Debian 12
 
 
