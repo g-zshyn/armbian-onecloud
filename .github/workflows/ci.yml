@@ -170,9 +170,6 @@ jobs:
           ref: ${{ env.ARMBIAN_SHA }}
 
 
-      - name: Bump meson current to 6.12.111 + fix HDMI PHY patch
-        run: |
-          sed -i 's/declare -g KERNELBRANCH="tag:v6.12.28" # frozen on this version/declare -g KERNELBRANCH="tag:v6.12.111"/' \
             config/sources/families/include/meson_common.inc
           curl -fsSL -o patch/kernel/archive/meson-6.12/0052-drm-meson-Describe-the-HDMI-PHY-frequency-limits-of-.patch \
             "https://raw.githubusercontent.com/${SCRIPT_REPO}/${SCRIPT_REF}/.github/patches/0052-drm-meson-Describe-the-HDMI-PHY-frequency-limits-of-.patch"
@@ -259,9 +256,6 @@ jobs:
           ref: ${{ env.ARMBIAN_SHA }}
 
 
-      - name: Bump meson current to 6.12.111 + fix HDMI PHY patch
-        run: |
-          sed -i 's/declare -g KERNELBRANCH="tag:v6.12.28" # frozen on this version/declare -g KERNELBRANCH="tag:v6.12.111"/' \
             config/sources/families/include/meson_common.inc
           curl -fsSL -o patch/kernel/archive/meson-6.12/0052-drm-meson-Describe-the-HDMI-PHY-frequency-limits-of-.patch \
             "https://raw.githubusercontent.com/${SCRIPT_REPO}/${SCRIPT_REF}/.github/patches/0052-drm-meson-Describe-the-HDMI-PHY-frequency-limits-of-.patch"
