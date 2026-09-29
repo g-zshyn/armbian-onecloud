@@ -2,6 +2,9 @@ name: CI
 
 on:
   workflow_dispatch:
+  schedule:
+    # Weekly: rebuild against latest Armbian stable (vYY.MM) tip
+    - cron: "17 3 * * 1"
   push:
     branches:
       - readme
@@ -15,7 +18,8 @@ env:
   UBOOT_RELEASE: latest
   UBOOT_BURNIMG: eMMC.burn.img
   ARMBIAN_REPO: armbian/build
-  ARMBIAN_REF: main
+  # Resolved in prepare to newest armbian/build branch matching vYY.MM (not main)
+  ARMBIAN_REF: ""
   PATCHES: ""
   PATCHES_DISABLED: 5082
 
@@ -43,6 +47,16 @@ jobs:
 
           SCRIPT_SHA=$(api "https://api.github.com/repos/${SCRIPT_REPO}/commits/${SCRIPT_REF}" | jq -r .sha)
           UBOOT_TAG=$(api "https://api.github.com/repos/${UBOOT_REPO}/releases/${UBOOT_RELEASE}" | jq -r .tag_name)
+
+          # Latest Armbian quarterly stable branch (v26.08, v26.11, ...), not main/trunk
+          ARMBIAN_REF=$(
+            api "https://api.github.com/repos/${ARMBIAN_REPO}/branches?per_page=100"               | jq -r '[.[].name | select(test("^v[0-9]+\\.[0-9]+$"))] | sort_by(split(".") | map(tonumber)) | last'
+          )
+          if [[ -z "${ARMBIAN_REF}" || "${ARMBIAN_REF}" == "null" ]]; then
+            echo "::error::Could not resolve Armbian stable branch (vYY.MM)"
+            exit 1
+          fi
+          echo "Resolved ARMBIAN_REF=${ARMBIAN_REF}"
           ARMBIAN_SHA=$(api "https://api.github.com/repos/${ARMBIAN_REPO}/commits/${ARMBIAN_REF}" | jq -r .sha)
 
           cat <<EOF | sed -E 's/^  //' >>$GITHUB_ENV
@@ -50,6 +64,7 @@ jobs:
             TAG=$TAG
             SCRIPT_SHA=$SCRIPT_SHA
             UBOOT_TAG=$UBOOT_TAG
+            ARMBIAN_REF=$ARMBIAN_REF
             ARMBIAN_SHA=$ARMBIAN_SHA
           EOF
           echo "env=$(cat $GITHUB_ENV | base64 -w 0)" >>$GITHUB_OUTPUT
