@@ -2,6 +2,8 @@ name: CI
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [ci-schedule-test]
   schedule:
     # Weekly check against latest Armbian stable (vYY.MM); skips if unchanged
     - cron: "17 3 * * 1"
@@ -35,6 +37,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
         run: |
           set -euo pipefail
           api() { curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "$1"; }
@@ -72,7 +75,8 @@ jobs:
           echo "Release ${RELEASE_NAME}"
 
           SKIP=false
-          if [[ "${EVENT_NAME}" == "schedule" ]]; then
+          # schedule = weekly cron; repository_dispatch ci-schedule-test = manual skip probe
+          if [[ "${EVENT_NAME}" == "schedule" || ( "${EVENT_NAME}" == "repository_dispatch" && "${EVENT_ACTION}" == "ci-schedule-test" ) ]]; then
             LAST_BODY=$(api "https://api.github.com/repos/${SCRIPT_REPO}/releases?per_page=5" \
               | jq -r 'map(select(.draft==false)) | .[0].body // empty')
             if [[ -n "${LAST_BODY}" ]] && grep -Fq "Fingerprint: ${FINGERPRINT}" <<<"${LAST_BODY}"; then
