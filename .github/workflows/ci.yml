@@ -169,12 +169,6 @@ jobs:
           repository: ${{ env.ARMBIAN_REPO }}
           ref: ${{ env.ARMBIAN_SHA }}
 
-
-            config/sources/families/include/meson_common.inc
-          curl -fsSL -o patch/kernel/archive/meson-6.12/0052-drm-meson-Describe-the-HDMI-PHY-frequency-limits-of-.patch \
-            "https://raw.githubusercontent.com/${SCRIPT_REPO}/${SCRIPT_REF}/.github/patches/0052-drm-meson-Describe-the-HDMI-PHY-frequency-limits-of-.patch"
-          grep -n 'KERNEL_MAJOR_MINOR\|KERNELBRANCH' config/sources/families/include/meson_common.inc || true
-
       - name: "Apply patch ${{ env.PATCHES }}"
         if: ${{ env.PATCHES }}
         run: |
@@ -254,12 +248,6 @@ jobs:
         with:
           repository: ${{ env.ARMBIAN_REPO }}
           ref: ${{ env.ARMBIAN_SHA }}
-
-
-            config/sources/families/include/meson_common.inc
-          curl -fsSL -o patch/kernel/archive/meson-6.12/0052-drm-meson-Describe-the-HDMI-PHY-frequency-limits-of-.patch \
-            "https://raw.githubusercontent.com/${SCRIPT_REPO}/${SCRIPT_REF}/.github/patches/0052-drm-meson-Describe-the-HDMI-PHY-frequency-limits-of-.patch"
-          grep -n 'KERNEL_MAJOR_MINOR\|KERNELBRANCH' config/sources/families/include/meson_common.inc || true
 
       - name: "Apply patch ${{ env.PATCHES }}"
         if: ${{ env.PATCHES }}
