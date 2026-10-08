@@ -8,6 +8,8 @@ on:
     # Weekly check against latest Armbian stable (vYY.MM); skips if unchanged
     - cron: "17 3 * * 1"
   push:
+    # A push of this file to readme builds an image and publishes a release.
+    # GitHub does not start that run when the commit message contains [skip ci].
     branches:
       - readme
     paths:
@@ -268,3 +270,27 @@ jobs:
           append_body: true
           body_path: Release.append.md
           files: output/images/*
+
+  # Public repos disable schedules after 60 days without activity. Fingerprint
+  # skips create no commit, so every cron run, including those skips, calls
+  # the enable endpoint. It is idempotent, creates no git object, and resets
+  # that timer. No `needs`: it must not wait on prepare or follow the skip flag.
+  # https://docs.github.com/en/rest/actions/workflows#enable-a-workflow
+  keepalive:
+    name: Keepalive
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: write
+    steps:
+      - name: Re-enable workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body -sS -L -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/enable"
+          echo "Re-enabled .github/workflows/ci.yml (no commit)"
